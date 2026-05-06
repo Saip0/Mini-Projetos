@@ -1,0 +1,93 @@
+from time import perf_counter
+from random import randint
+tempo_inicial:float = perf_counter()
+campo:list = [['~'for _ in range(5)] for _ in range(5)]
+fim_de_jogo = False
+
+def criar_bombas(campo):
+    cont:int = 0
+    pos_bombas:list = []
+    while cont < 3:
+        x_random:int = randint(0,len(campo)-1)
+        y_random:int = randint(0,len(campo)-1)
+        if campo[y_random][x_random] != '*':
+            cont += 1
+            pos_bombas.append((y_random,x_random))
+    return pos_bombas
+
+def bandeira(campo):
+    while True:
+        try:
+            y_pos_bandeira:int = (int(input("Linha Da Bandeira:")))
+            x_pos_bandeira:int = (int(input("Coluna Da Bandeira:")))
+        except ValueError:
+            print('Posição Não Existe')
+            continue
+        if 0 <= y_pos_bandeira < len(campo) and 0 <= x_pos_bandeira < len(campo[0]):
+            pass
+        else:
+            print("Erro")
+            continue
+        break
+    if campo[y_pos_bandeira][x_pos_bandeira] == '~':
+        campo[y_pos_bandeira][x_pos_bandeira] = '#'
+    else:
+        campo[y_pos_bandeira][x_pos_bandeira] = '~'
+        
+def pistas_numericas(campo,pos_bombas,fim_de_jogo):
+    cont:int = 0
+    offset:tuple = tuple((i,j) for i in range(-1,2) for j in range(-1,2) if (i,j) != (0,0))
+    while not fim_de_jogo:
+        try:
+            y_camp:int = (int(input("Linha Do Campo:")))
+            x_camp:int = (int(input("Coluna Do Campo:")))
+        except ValueError:
+            print("Erro, Número Inválid")
+            continue
+        if 0 <= y_camp < len(campo) and 0 <= x_camp < len(campo[0]):
+            pass
+        else:
+            print("Número Inválido")
+            continue
+        break
+    
+    for y,x in offset:
+        x_viz,y_viz = x+x_camp,y+y_camp
+        if 0 <= x_viz < len(campo) and 0 <= y_viz < len(campo) and campo[y_camp][x_camp] != '#':
+            for bomba in pos_bombas:
+                if (y_camp,x_camp) == (bomba[0],bomba[1]):
+                    fim_de_jogo = True
+                elif (y_viz,x_viz) == (bomba[0],bomba[1]):
+                    cont += 1
+                    
+    if campo[y_camp][x_camp] != '#':
+        campo[y_camp][x_camp] = str(cont)
+    return fim_de_jogo
+                        
+pos_bombas:list = criar_bombas(campo)
+#print(pos_bombas) Posição Das Bombas
+[print(linha) for linha in campo]                        
+
+while not fim_de_jogo:
+        try:
+            opcao:int = (int(input("Opção Que Deseja:\n"
+                                   "1)Linha X Coluna Para Iniciar\n"
+                                   "2)Linha X Coluna Bandeira\n"
+                                   "Opção:")))
+        except ValueError:
+            print("Erro, Número Inválido")
+            continue
+
+        
+        match opcao:
+            case 1:
+                fim_de_jogo = pistas_numericas(campo,pos_bombas,fim_de_jogo)
+            case 2:
+                bandeira(campo)
+            case _:
+                print("Opção Inválida")
+                continue
+        [print(linha) for linha in campo]
+
+print(f"{'-='*10}Jogo Finalizado{'=-'*10}\n"
+      f"O Seu Tempo Total De Jogo Foi De: {int(perf_counter() - tempo_inicial)} Segundos")
